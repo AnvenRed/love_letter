@@ -1,4 +1,4 @@
-require_relative "LoveLetter"
+require_relative "../game_classes/LoveLetter"
 require "test/unit"
 
 class TestLoveLetter < Test::Unit::TestCase
@@ -16,7 +16,7 @@ class TestLoveLetter < Test::Unit::TestCase
   end
 
   def test_deck_initalized
-    puts "Removed Card: #{@new_game.removed_card}"
+    assert(@new_game.card_values.key?(@new_game.removed_card))
     assert_equal(16, @new_game.deck.length)
   end
 

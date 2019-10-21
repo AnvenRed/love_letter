@@ -1,5 +1,5 @@
-require_relative "LoveLetter"
-require_relative "Player"
+require_relative "../game_classes/LoveLetter"
+require_relative "../game_classes/Player"
 require "test/unit"
 
 class TestLoveLetterCardActions < Test::Unit::TestCase

@@ -1,8 +1,8 @@
 require 'sinatra'
 require 'sinatra/reloader'
 require 'sinatra/json'
-require_relative 'LoveLetter.rb'
-require_relative 'Player.rb'
+require_relative '/game_classes/LoveLetter.rb'
+require_relative 'game_classes/Player.rb'
 
 game1 = LoveLetter.new
 player1 = Player.new("Anirudh", game1)

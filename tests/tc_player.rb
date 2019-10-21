@@ -1,4 +1,4 @@
-require_relative "Player"
+require_relative "../game_classes/Player"
 require "test/unit"
 
 class TestPlayer < Test::Unit::TestCase
@@ -16,7 +16,6 @@ class TestPlayer < Test::Unit::TestCase
   def test_draw()
     @player.draw("Guard")
     assert_equal("Guard",@player.hand[0])
-    puts @player.hand
   end
 
   def test_discard()
