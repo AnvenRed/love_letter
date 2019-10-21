@@ -44,4 +44,38 @@ class Player
     }
   end
 
+  def play_handmaid()
+    self.discard("Handmaid")
+    {
+      'Initiating Player' => @name
+    }
+  end
+
+  def play_prince(target_player)
+    self.discard("Prince")
+    {
+      "Initiating Player" => @name,
+      "Target Player" => target_player
+    }
+  end
+
+  def play_king(target_player)
+    self.discard("King")
+    {
+      "Initiating Player" => @name,
+      "Target Player" => target_player
+    }
+  end
+
+  def play_countess()
+    self.discard("Countess")
+  end
+
+  def play_princess()
+    self.discard("Princess")
+    {
+      "Initiating Player" => @name
+    }
+  end
+
 end

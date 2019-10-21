@@ -68,4 +68,38 @@ class LoveLetter
     end
   end
 
+  def handmaid(handmaid_action)
+    initiating_player = handmaid_action["Initiating Player"]
+    @players[initiating_player].status = "Protected"
+    "#{initiating_player} is now protected by the handmaid"
+  end
+
+  def prince(prince_action)
+    target_player = @players[prince_action["Target Player"]]
+    discarded = target_player.hand[0]
+    if @deck.empty?
+      target_player.hand = [@removed_card]
+    else
+      target_player.discard(discarded)
+      target_player.draw(self.get_card)
+    end
+    {
+      "Discarded" => discarded
+    }
+  end
+
+  def king(king_action)
+    initiating_player = @players[king_action["Initiating Player"]]
+    target_player = @players[king_action["Target Player"]]
+    ip_hand = initiating_player.hand
+    initiating_player.hand = target_player.hand
+    target_player.hand = ip_hand
+  end
+
+  def princess(princess_action)
+    initiating_player = @players[princess_action["Initiating Player"]]
+    initiating_player.status = "Closed"
+    "#{initiating_player.name} is out!"
+  end
+
 end

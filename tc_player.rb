@@ -54,5 +54,45 @@ class TestPlayer < Test::Unit::TestCase
     assert_equal(expected,@player.play_baron("Player2"))
   end
 
+  def test_play_handmaid()
+    @player.draw("Handmaid")
+    expected = {
+      'Initiating Player' => "Player1"
+    }
+    assert_equal(expected["Initiating Player"], @player.play_handmaid["Initiating Player"])
+  end
+
+  def test_play_prince()
+    @player.draw("Prince")
+    expected = {
+      "Initiating Player" => "Player1",
+      "Target Player" => "Player2"
+    }
+    assert_equal(expected, @player.play_prince("Player2"))
+  end
+
+  def test_play_king()
+    @player.draw("King")
+    expected = {
+      "Initiating Player" => "Player1",
+      "Target Player" => "Player2"
+    }
+    assert_equal(expected,@player.play_king("Player2"))
+  end
+
+  def test_play_countess()
+    @player.draw("Priest")
+    @player.draw("Countess")
+    @player.play_countess
+    assert_equal(["Priest"],@player.hand)
+  end
+
+  def test_play_princess()
+    @player.draw("Princess")
+    expected = {
+      "Initiating Player" => "Player1"
+    }
+    assert_equal(expected, @player.play_princess)
+  end
 
 end

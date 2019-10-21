@@ -52,5 +52,44 @@ class TestLoveLetterCardActions < Test::Unit::TestCase
     assert_equal(expected,@new_game.baron(baron_action))
   end
 
+  def test_handmaid()
+    @player1.draw("Handmaid")
+    handmaid_action = @player1.play_handmaid
+    assert_equal("Open", @player1.status)
+    returned = @new_game.handmaid(handmaid_action)
+    assert_equal("Player1 is now protected by the handmaid",returned)
+    assert_equal("Protected", @player1.status)
+  end
+
+  def test_prince()
+    @player1.draw("Prince")
+    @player2.draw("Countess")
+    top_card = @new_game.deck[-1]
+    prince_action = @player1.play_prince("Player2")
+    returned = @new_game.prince(prince_action)
+    expected = {
+      "Discarded" => "Countess"
+    }
+    assert_equal(expected,returned)
+    assert_equal(top_card, @player2.hand[0])
+  end
+
+  def test_king()
+    @player1.draw("King")
+    @player1.draw("Priest")
+    @player2.draw("Countess")
+    king_action = @player1.play_king("Player2")
+    @new_game.king(king_action)
+    assert_equal(["Countess"], @player1.hand)
+    assert_equal(["Priest"], @player2.hand)
+  end
+
+  def test_princess()
+    @player1.draw("Princess")
+    princess_action = @player1.play_princess
+    assert_equal("Player1 is out!", @new_game.princess(princess_action))
+    assert_equal("Closed", @player1.status)
+  end
+
 
 end
