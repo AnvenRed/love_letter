@@ -14,7 +14,7 @@ class TestLoveLetterCardActions < Test::Unit::TestCase
 
   def test_guard()
     @player1.hand = ["Princess"]
-    assert_equal("Player1 must discard",@new_game.guard("Player1","Princess"))
+    assert_equal("Player1 is out",@new_game.guard("Player1","Princess"))
     assert_equal("Wrong", @new_game.guard("Player1","King"))
     assert_equal("Guess a non-guard card", @new_game.guard("Player1","Guard"))
   end

@@ -16,14 +16,17 @@ class Player
   def discard(card_name)
     if @hand.include? card_name
       @hand.delete_at(@hand.index(card_name))
-      card_name
     else
       "Choose a card that's actually in your hand"
     end
   end
 
-  def guard()
-    
+  def play_guard(player_name,guessed_card)
+    self.discard("Guard")
+    {
+      'Guessee' => player_name,
+      'Card' => guessed_card
+    }
   end
 
 end

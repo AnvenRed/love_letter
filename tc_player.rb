@@ -27,7 +27,16 @@ class TestPlayer < Test::Unit::TestCase
     assert_equal("Princess",@player.discard("Princess"))
   end
 
-  
+  def test_play_guard()
+    @player.draw("Guard")
+    expected = {
+      'Guessee' => "Player2",
+      'Card' => "Princess"
+    }
+    returned = @player.play_guard("Player2","Princess")
+    assert_equal("Player2",returned['Guessee'])
+    assert_equal("Princess",returned['Card'])
+  end
 
 
 end

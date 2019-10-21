@@ -33,13 +33,15 @@ class LoveLetter
     end
   end
 
-  def guard(guessee, guessed_card)
+  def guard(guard_guess)
+    guessee = guard_guess['Guessee']
+    guessed_card = guard_guess['Card']
     if guessed_card == "Guard"
       "Guess a non-guard card"
     else
       guessee_card = @players[guessee].hand[0]
       if guessed_card == guessee_card
-        "#{guessee} must discard"
+        "#{guessee} is out"
       else
         "Wrong"
       end
