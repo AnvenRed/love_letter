@@ -17,15 +17,30 @@ class Player
     if @hand.include? card_name
       @hand.delete_at(@hand.index(card_name))
     else
-      "Choose a card that's actually in your hand"
+      raise 'You don\'t have this card in your hand'
     end
   end
 
   def play_guard(player_name,guessed_card)
     self.discard("Guard")
     {
-      'Guessee' => player_name,
+      'Target Player' => player_name,
       'Card' => guessed_card
+    }
+  end
+
+  def play_priest(player_name)
+    self.discard("Priest")
+    {
+      'Target Player' => player_name
+    }
+  end
+
+  def play_baron(target_player)
+    self.discard("Baron")
+    {
+      "Initiating Player" => @name,
+      "Target Player" => target_player
     }
   end
 

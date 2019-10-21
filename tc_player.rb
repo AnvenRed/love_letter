@@ -21,21 +21,37 @@ class TestPlayer < Test::Unit::TestCase
 
   def test_discard()
     @player.draw("Guard")
-    @player.draw("Princess")
     assert_equal("Guard", @player.discard("Guard"))
-    assert_equal("Choose a card that's actually in your hand",@player.discard("Priest"))
-    assert_equal("Princess",@player.discard("Princess"))
+    assert_raise RuntimeError do
+      @player.discard("Priest")
+    end
   end
 
   def test_play_guard()
     @player.draw("Guard")
     expected = {
-      'Guessee' => "Player2",
+      'Target Player' => "Player2",
       'Card' => "Princess"
     }
     returned = @player.play_guard("Player2","Princess")
-    assert_equal("Player2",returned['Guessee'])
+    assert_equal("Player2",returned['Target Player'])
     assert_equal("Princess",returned['Card'])
+  end
+
+  def test_play_priest()
+    @player.draw("Priest")
+    expected = "Player2"
+    returned = @player.play_priest("Player2")['Target Player']
+    assert_equal(expected,returned)
+  end
+
+  def test_play_baron()
+    @player.draw("Baron")
+    expected = {
+      'Initiating Player' => @player.name,
+      'Target Player' => "Player2"
+    }
+    assert_equal(expected,@player.play_baron("Player2"))
   end
 
 

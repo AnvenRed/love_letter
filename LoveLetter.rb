@@ -33,9 +33,9 @@ class LoveLetter
     end
   end
 
-  def guard(guard_guess)
-    guessee = guard_guess['Guessee']
-    guessed_card = guard_guess['Card']
+  def guard(guard_action)
+    guessee = guard_action['Target Player']
+    guessed_card = guard_action['Card']
     if guessed_card == "Guard"
       "Guess a non-guard card"
     else
@@ -45,6 +45,26 @@ class LoveLetter
       else
         "Wrong"
       end
+    end
+  end
+
+  def priest(priest_action)
+    target_player = priest_action['Target Player']
+    target_player = @players[target_player]
+    target_player.hand
+  end
+
+  def baron(baron_action)
+    initiating_player = @players[baron_action["Initiating Player"]]
+    ip_card_val = @@card_values[initiating_player.hand[0]]
+    target_player = @players[baron_action["Target Player"]]
+    tp_card_val = @@card_values[target_player.hand[0]]
+    if ip_card_val > tp_card_val
+      "#{target_player.name} is out!"
+    elsif ip_card_val == tp_card_val
+      "Tie"
+    else
+      "#{initiating_player.name} is out!"
     end
   end
 
