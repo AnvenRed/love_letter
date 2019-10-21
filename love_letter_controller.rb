@@ -6,26 +6,26 @@ require 'uuid'
 set :bind, '0.0.0.0'
 set :port, 5000
 
+love_letter = LoveLetter.new
 arr = []
 uuid = UUID.new
-cards = [1, 2, 3, 4, 5, 6, 7, 8]
-player_hands = {}
-=begin
-get '/' do
-  arr << "#{request.ip}"
-  allIPs = arr.map { |i| "'" + i.to_s + "'" }.join("<br>")
-  "IPs<br>#{allIPs}"
-end
-=end
+player1 = Player.new('Player1')
+player2 = Player.new('Player2')
+love_letter.players['Player1'] = player1
+love_letter.players['Player2'] = player2
+
+deck = love_letter.deck
+
 get '/' do
   if (cookies[:session] == nil) 
     thisKey = uuid.generate
     cookies[:session] = thisKey
   end
   "#{cookies[:session]}"
-  redirect '/hand'
+  redirect '/draw'
 end
 
+=begin
 get '/hand' do
   if (cookies[:session] != nil)
     if (!player_hands.has_key?(cookies[:session]))
@@ -33,13 +33,22 @@ get '/hand' do
       hand = []
       while size > 0
         card = rand(8)
-        hand << cards[card]
+        hand << deck[card]
         size = size - 1
       end
       player_hands[cookies[:session]] = hand
     end
   end
     "#{player_hands[cookies[:session]]}"
+end
+=end
+
+get '/deck' do
+  "#{love_letter.deck}"
+end
+
+get '/hand' do
+  "#{player1.hand}"
 end
 
 get '/remove_card' do
@@ -54,6 +63,12 @@ get '/remove_card' do
 end
 
 get '/draw' do
+  player1.draw(love_letter.get_card)
+  redirect '/hand'
+end
+
+=begin
+get '/draw' do
   if (cookies[:session] != nil)
     if (player_hands.has_key?(cookies[:session]))
       hand = player_hands[cookies[:session]]
@@ -63,6 +78,7 @@ get '/draw' do
   end
   redirect '/hand'
 end
+=end
 
 get '/peak' do
   display = "Player &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Hands<br>"
