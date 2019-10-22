@@ -28,55 +28,44 @@ class TestPlayer < Test::Unit::TestCase
 
   def test_play_guard()
     @player.draw("Guard")
-    expected = {
-      'Target Player' => "Player2",
-      'Card' => "Princess"
-    }
+    expected = @player.create_action("Player2","Guard","Princess")
     returned = @player.play_guard("Player2","Princess")
-    assert_equal("Player2",returned['Target Player'])
-    assert_equal("Princess",returned['Card'])
+    assert_equal(expected,returned)
   end
 
   def test_play_priest()
     @player.draw("Priest")
-    expected = "Player2"
-    returned = @player.play_priest("Player2")['Target Player']
+    expected = @player.create_action("Player2","Priest")
+    returned = @player.play_priest("Player2")
     assert_equal(expected,returned)
   end
 
   def test_play_baron()
     @player.draw("Baron")
-    expected = {
-      'Initiating Player' => @player.name,
-      'Target Player' => "Player2"
-    }
-    assert_equal(expected,@player.play_baron("Player2"))
+    expected = @player.create_action("Player2","Baron")
+    returned = @player.play_baron("Player2")
+    assert_equal(expected,returned)
   end
 
   def test_play_handmaid()
     @player.draw("Handmaid")
-    expected = {
-      'Initiating Player' => "Player1"
-    }
-    assert_equal(expected["Initiating Player"], @player.play_handmaid["Initiating Player"])
+    expected = @player.create_action("Player1","Handmaid")
+    returned = @player.play_handmaid
+    assert_equal(expected,returned)
   end
 
   def test_play_prince()
     @player.draw("Prince")
-    expected = {
-      "Initiating Player" => "Player1",
-      "Target Player" => "Player2"
-    }
-    assert_equal(expected, @player.play_prince("Player2"))
+    expected = @player.create_action("Player2","Prince")
+    returned = @player.play_prince("Player2")
+    assert_equal(expected, returned)
   end
 
   def test_play_king()
     @player.draw("King")
-    expected = {
-      "Initiating Player" => "Player1",
-      "Target Player" => "Player2"
-    }
-    assert_equal(expected,@player.play_king("Player2"))
+    expected = @player.create_action("Player2","King")
+    returned = @player.play_king("Player2")
+    assert_equal(expected,returned)
   end
 
   def test_play_countess()
@@ -88,10 +77,9 @@ class TestPlayer < Test::Unit::TestCase
 
   def test_play_princess()
     @player.draw("Princess")
-    expected = {
-      "Initiating Player" => "Player1"
-    }
-    assert_equal(expected, @player.play_princess)
+    expected = @player.create_action("Player1","Princess")
+    returned = @player.play_princess
+    assert_equal(expected, returned)
   end
 
 end

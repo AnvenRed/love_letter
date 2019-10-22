@@ -13,18 +13,41 @@ class LoveLetter
 
   @@unshuffledDeck = ["Guard"]*5 + ["Priest"]*2 + ["Baron"]*2 + ["Handmaid"]*2 + ["Prince"]*2 + ["King"]*2 + ["Countess"] + ["Princess"]
 
-  attr_accessor :deck, :players, :card_values, :removed_card
+  attr_accessor :deck, :players, :card_values, :removed_card, :in_play
 
   def initialize()
     shuffled = @@unshuffledDeck.shuffle
     @removed_card = shuffled.pop
     @deck = shuffled
     @players = {}
+    @in_play = []
     @card_values = @@card_values
+  end
+
+  def add_player(player)
+    @players[player.name] = player
+    @in_play.push(player.name)
   end
 
   def get_card()
     @deck.pop
+  end
+
+  def create_status_change(player,new_status)
+    {
+      "Player" => player,
+      "Status" => new_status
+    }
+  end
+
+  def change_status(status_change)
+    player = status_change["Player"]
+    new_status = status_change["Status"]
+    @players[player].status = new_status
+    if new_status == "Out"
+      @in_play -= [player]
+    end
+    status_change
   end
 
   def execute_card_action(card_name)
@@ -33,49 +56,43 @@ class LoveLetter
     end
   end
 
-  def guard(guard_action)
-    guessee = guard_action['Target Player']
-    guessed_card = guard_action['Card']
-    if guessed_card == "Guard"
-      "Guess a non-guard card"
+  def guard_played(player_action)
+    target_player = player_action["Target Player"]
+    guessed_card = player_action['Card Played Requirement']
+    target_player_card = @players[target_player].hand[0]
+    if guessed_card == target_player_card
+      status_change = create_status_change(target_player,"Out")
+      change_status(status_change)
     else
-      guessee_card = @players[guessee].hand[0]
-      if guessed_card == guessee_card
-        "#{guessee} is out"
-      else
-        "Wrong"
-      end
+      "Wrong"
     end
   end
 
-  def priest(priest_action)
-    target_player = priest_action['Target Player']
-    target_player = @players[target_player]
+  def priest_played(player_action)
+    target_player = @players[player_action["Target Player"]]
     target_player.hand
   end
 
-  def baron(baron_action)
-    initiating_player = @players[baron_action["Initiating Player"]]
+  def baron_played(player_action)
+    initiating_player = @players[player_action["Initiating Player"]]
     ip_card_val = @@card_values[initiating_player.hand[0]]
-    target_player = @players[baron_action["Target Player"]]
+    target_player = @players[player_action["Target Player"]]
     tp_card_val = @@card_values[target_player.hand[0]]
     if ip_card_val > tp_card_val
-      "#{target_player.name} is out!"
+      change_status(create_status_change("Player2", "Out"))
     elsif ip_card_val == tp_card_val
       "Tie"
     else
-      "#{initiating_player.name} is out!"
+      change_status(create_status_change("Player1", "Out"))
     end
   end
 
-  def handmaid(handmaid_action)
-    initiating_player = handmaid_action["Initiating Player"]
-    @players[initiating_player].status = "Protected"
-    "#{initiating_player} is now protected by the handmaid"
+  def handmaid_played(player_action)
+    change_status(create_status_change(player_action["Initiating Player"], "Protected"))
   end
 
-  def prince(prince_action)
-    target_player = @players[prince_action["Target Player"]]
+  def prince_played(player_action)
+    target_player = @players[player_action["Target Player"]]
     discarded = target_player.hand[0]
     if @deck.empty?
       target_player.hand = [@removed_card]
@@ -88,18 +105,16 @@ class LoveLetter
     }
   end
 
-  def king(king_action)
-    initiating_player = @players[king_action["Initiating Player"]]
-    target_player = @players[king_action["Target Player"]]
+  def king_played(player_action)
+    initiating_player = @players[player_action["Initiating Player"]]
+    target_player = @players[player_action["Target Player"]]
     ip_hand = initiating_player.hand
     initiating_player.hand = target_player.hand
     target_player.hand = ip_hand
   end
 
-  def princess(princess_action)
-    initiating_player = @players[princess_action["Initiating Player"]]
-    initiating_player.status = "Closed"
-    "#{initiating_player.name} is out!"
+  def princess_played(player_action)
+    change_status(create_status_change(player_action["Initiating Player"], "Out"))
   end
 
 end

@@ -1,4 +1,5 @@
 require_relative "../game_classes/LoveLetter"
+require_relative "../game_classes/Player"
 require "test/unit"
 
 class TestLoveLetter < Test::Unit::TestCase
@@ -7,8 +8,19 @@ class TestLoveLetter < Test::Unit::TestCase
     @new_game = LoveLetter.new
   end
 
-  def test_discard
-    assert_equal(@new_game.deck[-1],@new_game.get_card)
+  def test_initalization
+    player1 = Player.new("Player1")
+    @new_game.add_player(player1)
+    expected = ["Player1"]
+    actual = @new_game.in_play
+    assert_equal(expected, actual)
+    expected = player1
+    actual = @new_game.players["Player1"]
+    assert_equal(expected, actual)
+  end
+
+  def test_get_card
+    assert_equal(@new_game.deck[-1], @new_game.get_card)
   end
 
   def test_card_value_lookup
@@ -19,11 +31,5 @@ class TestLoveLetter < Test::Unit::TestCase
     assert(@new_game.card_values.key?(@new_game.removed_card))
     assert_equal(16, @new_game.deck.length)
   end
-
-  def test_execute_card_action
-    assert_equal("you lose",@new_game.execute_card_action("Princess").downcase)
-  end
-
-
 
 end

@@ -1,6 +1,15 @@
 class Player
 
   attr_accessor :name, :hand, :game, :status
+  
+  def create_action(target,card_played,card_played_requirement=nil)
+    {
+      "Initiating Player" => @name,
+      "Target Player" => target,
+      "Card Played" => card_played,
+      "Card Played Requirement" => card_played_requirement
+    }
+  end
 
   def initialize(name)
     @name = name
@@ -17,54 +26,45 @@ class Player
     if @hand.include? card_name
       @hand.delete_at(@hand.index(card_name))
     else
-      raise 'You don\'t have this card in your hand'
+      raise "You don't have this card in your hand"
     end
   end
 
-  def play_guard(player_name,guessed_card)
+  def play_guard(target_player,guessed_card)
     self.discard("Guard")
-    {
-      'Target Player' => player_name,
-      'Card' => guessed_card
-    }
+    player_action = create_action(target_player,"Guard")
+    player_action["Card Played Requirement"] = guessed_card
+    player_action
   end
 
-  def play_priest(player_name)
+  def play_priest(target_player)
     self.discard("Priest")
-    {
-      'Target Player' => player_name
-    }
+    player_action = create_action(target_player,"Priest")
+    player_action
   end
 
   def play_baron(target_player)
     self.discard("Baron")
-    {
-      "Initiating Player" => @name,
-      "Target Player" => target_player
-    }
+    player_action = create_action(target_player,"Baron")
+    player_action
   end
 
   def play_handmaid()
     self.discard("Handmaid")
-    {
-      'Initiating Player' => @name
-    }
+    player_action = create_action(@name,"Handmaid")
+    player_action
   end
 
   def play_prince(target_player)
     self.discard("Prince")
-    {
-      "Initiating Player" => @name,
-      "Target Player" => target_player
-    }
+    player_action = create_action(target_player,"Prince")
+    player_action
   end
 
   def play_king(target_player)
     self.discard("King")
-    {
-      "Initiating Player" => @name,
-      "Target Player" => target_player
-    }
+    player_action = create_action(target_player,"King")
+    player_action
   end
 
   def play_countess()
@@ -73,9 +73,8 @@ class Player
 
   def play_princess()
     self.discard("Princess")
-    {
-      "Initiating Player" => @name
-    }
+    player_action = create_action(@name,"Princess")
+    player_action
   end
 
 end

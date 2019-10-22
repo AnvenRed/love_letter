@@ -8,65 +8,111 @@ class TestLoveLetterCardActions < Test::Unit::TestCase
     @new_game = LoveLetter.new
     @player1 = Player.new("Player1")
     @player2 = Player.new("Player2")
-    @new_game.players["Player1"] = @player1
-    @new_game.players["Player2"] = @player2
+    @new_game.add_player(@player1)
+    @new_game.add_player(@player2)
   end
 
-  def test_guard()
-    @player1.hand = ["Princess"]
-    guard_action = {
-      'Target Player' =>  "",
-      'Card' => ""
+  def test_change_status()
+    assert_equal(2, @new_game.in_play.length)
+    assert_equal("Open", @player1.status)
+    status_change = @new_game.create_status_change("Player1","Protected")
+    @new_game.change_status(status_change)
+    expected = "Protected"
+    returned = @player1.status
+    assert_equal(expected, returned)
+    status_change = @new_game.create_status_change("Player2","Out")
+    @new_game.change_status(status_change)
+    expected = ["Player1"]
+    returned = @new_game.in_play
+    assert_equal(expected, returned)
+    expected = "Out"
+    returned = @player2.status
+    assert_equal(expected, returned)
+  end
+
+  def test_guard_played_guess_right()
+    @player1.draw("Guard")
+    @player2.draw("Countess")
+    player_action = @player1.play_guard("Player2","Countess")
+    expected = {
+      "Player" => "Player2",
+      "Status" => "Out"
     }
-    guard_action['Target Player'] = "Player1"
-    guard_action['Card'] = "Princess"
-    assert_equal("Player1 is out",@new_game.guard(guard_action))
-    guard_action['Target Player'] = "Player1"
-    guard_action['Card'] = "King"
-    assert_equal("Wrong", @new_game.guard(guard_action))
-    guard_action['Target Player'] = "Player1"
-    guard_action['Card'] = "Guard"
-    assert_equal("Guess a non-guard card", @new_game.guard(guard_action))
+    returned = @new_game.guard_played(player_action)
+    assert_equal(expected, returned)
   end
 
-  def test_priest()
-    @player2.draw("Princess")
-    priest_action = {
-      'Target Player' => 'Player2'
-    }
-    expected = ["Princess"]
-    returned = @new_game.priest(priest_action)
-    assert_equal(expected,returned)
+  def test_guard_played_guess_wrong()
+    @player1.draw("Guard")
+    @player2.draw("Countess")
+    player_action = @player1.play_guard("Player2","Baron")
+    expected = "Wrong"
+    returned = @new_game.guard_played(player_action)
+    assert_equal(expected, returned)
   end
 
-  def test_baron()
+  def test_priest_played()
+    @player1.draw("Priest")
+    @player2.draw("Countess")
+    player_action = @player1.play_priest("Player2")
+    expected = ["Countess"]
+    returned = @new_game.priest_played(player_action)
+    assert_equal(expected, returned)
+  end
+
+  def test_baron_played_win()
     @player1.draw("Baron")
     @player1.draw("King")
     @player2.draw("Priest")
-    baron_action = @player1.play_baron("Player2")
-    expected = "Player2 is out!"
-    assert_equal(expected,@new_game.baron(baron_action))
-    @player2.discard("Priest")
+    player_action = @player1.play_baron("Player2")
+    expected = {
+      "Player" => "Player2",
+      "Status" => "Out"
+    }
+    returned = @new_game.baron_played(player_action)
+    assert_equal(expected, returned)
+  end
+
+  def test_baron_played_lose()
+    @player1.draw("Baron")
+    @player1.draw("King")
     @player2.draw("Countess")
-    expected = "Player1 is out!"
-    assert_equal(expected,@new_game.baron(baron_action))
+    player_action = @player1.play_baron("Player2")
+    expected = {
+      "Player" => "Player1",
+      "Status" => "Out"
+    }
+    returned = @new_game.baron_played(player_action)
+    assert_equal(expected, returned)
   end
 
-  def test_handmaid()
+  def test_baron_draw()
+    @player1.draw("Baron")
+    @player1.draw("Prince")
+    @player2.draw("Prince")
+    player_action = @player1.play_baron("Player2")
+    expected = "Tie"
+    returned = @new_game.baron_played(player_action)
+    assert_equal(expected, returned)
+  end
+
+  def test_handmaid_played()
     @player1.draw("Handmaid")
-    handmaid_action = @player1.play_handmaid
-    assert_equal("Open", @player1.status)
-    returned = @new_game.handmaid(handmaid_action)
-    assert_equal("Player1 is now protected by the handmaid",returned)
-    assert_equal("Protected", @player1.status)
+    player_action = @player1.play_handmaid
+    expected = {
+      "Player" => "Player1",
+      "Status" => "Protected"
+    }
+    returned = @new_game.handmaid_played(player_action)
+    assert_equal(expected, returned)
   end
 
-  def test_prince()
+  def test_prince_played()
     @player1.draw("Prince")
     @player2.draw("Countess")
     top_card = @new_game.deck[-1]
-    prince_action = @player1.play_prince("Player2")
-    returned = @new_game.prince(prince_action)
+    player_action = @player1.play_prince("Player2")
+    returned = @new_game.prince_played(player_action)
     expected = {
       "Discarded" => "Countess"
     }
@@ -74,21 +120,36 @@ class TestLoveLetterCardActions < Test::Unit::TestCase
     assert_equal(top_card, @player2.hand[0])
   end
 
-  def test_king()
+  def test_prince_played_empty_deck()
+    @player1.draw("Prince")
+    @player2.draw("Countess")
+    @new_game.deck = []
+    player_action = @player1.play_prince("Player2")
+    @new_game.prince_played(player_action)
+    expected = @new_game.removed_card
+    actual = @player2.hand[0]
+    assert_equal(expected, actual)
+  end
+
+  def test_king_played()
     @player1.draw("King")
     @player1.draw("Priest")
     @player2.draw("Countess")
-    king_action = @player1.play_king("Player2")
-    @new_game.king(king_action)
+    player_action = @player1.play_king("Player2")
+    @new_game.king_played(player_action)
     assert_equal(["Countess"], @player1.hand)
     assert_equal(["Priest"], @player2.hand)
   end
 
-  def test_princess()
+  def test_princess_played()
     @player1.draw("Princess")
-    princess_action = @player1.play_princess
-    assert_equal("Player1 is out!", @new_game.princess(princess_action))
-    assert_equal("Closed", @player1.status)
+    player_action = @player1.play_princess
+    expected = {
+      "Player" => "Player1",
+      "Status" => "Out"
+    }
+    returned = @new_game.princess_played(player_action)
+    assert_equal(expected, returned)
   end
 
 
