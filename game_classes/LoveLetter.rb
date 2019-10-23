@@ -13,7 +13,7 @@ class LoveLetter
 
   @@unshuffledDeck = ["Guard"]*5 + ["Priest"]*2 + ["Baron"]*2 + ["Handmaid"]*2 + ["Prince"]*2 + ["King"]*2 + ["Countess"] + ["Princess"]
 
-  attr_accessor :deck, :players, :card_values, :removed_card, :in_play
+  attr_accessor :deck, :players, :card_values, :removed_card, :in_play, :last_card_played
 
   def initialize()
     shuffled = @@unshuffledDeck.shuffle
@@ -89,6 +89,7 @@ class LoveLetter
 
   def execute_card_action(player_action)
     card_played = player_action["Card Played"]
+    @discarded.push(card_played)
     @last_card_played = card_played
     case card_played
     when "Guard"
@@ -112,33 +113,54 @@ class LoveLetter
   end
 
   def guard_played(player_action)
+    player_return = {
+      "Initiating Player Return" => "You guessed right!",
+      "Target Player Return" => "You're out!"
+    }
     target_player = player_action["Target Player"]
     guessed_card = player_action['Card Played Requirement']
     target_player_card = @players[target_player].hand[0]
     if guessed_card == target_player_card
       status_change = create_status_change(target_player,"Out")
       change_status(status_change)
+      return player_return
     else
-      "Wrong"
+      player_return["Initiating Player Return"] = "You guessed wrong!"
+      player_return["Target Player Return"] = "You're safe...for now"
+      return player_return
     end
   end
 
   def priest_played(player_action)
+    player_return = {
+      "Initiating Player Return" => []
+    }
     target_player = @players[player_action["Target Player"]]
-    target_player.hand
+    player_return["Initiating Player Return"] = target_player.hand
+    return player_return
   end
 
   def baron_played(player_action)
+    player_return = {
+      "Initiating Player Return" => "You win the exchange!",
+      "Target Player Return" => "You're out!"
+    }
     initiating_player = @players[player_action["Initiating Player"]]
     ip_card_val = @@card_values[initiating_player.hand[0]]
     target_player = @players[player_action["Target Player"]]
     tp_card_val = @@card_values[target_player.hand[0]]
     if ip_card_val > tp_card_val
-      change_status(create_status_change("Player2", "Out"))
+      change_status(create_status_change(target_player.name, "Out"))
+      return player_return
     elsif ip_card_val == tp_card_val
-      "Tie"
+      player_return["Initiating Player Return"] = "It's a Tie!"
+      player_return["Target Player Return"] = "It's a Tie!"
+      return player_return
     else
-      change_status(create_status_change("Player1", "Out"))
+      change_status(create_status_change(initiating_player.name, "Out"))
+      player_return["Initiating Player Return"] = "You're out!"
+      player_return["Target Player Return"] = "You win the exchange!"
+      return player_return
     end
   end
 
