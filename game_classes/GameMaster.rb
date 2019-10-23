@@ -8,6 +8,22 @@ class GameMaster
     @game.add_player(player)
   end
 
+  def get_players()
+    @game.players.keys
+  end
+
+  def get_player_hands()
+    @game.players.each_value do |player|
+      puts player.hand
+    end
+  end
+
+  def start_game()
+    @game.players.each_value do |player|
+      player_draws_card(player)
+    end
+  end
+
   def execute_player_action(player_action)
     action_type = player_action["Action Type"]
     case action_type
