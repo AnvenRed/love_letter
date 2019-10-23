@@ -1,7 +1,7 @@
 class Player
 
-  attr_accessor :name, :hand, :game, :status
-  
+  attr_accessor :name, :hand, :in_game, :status, :is_turn
+
   def create_action(target,card_played,card_played_requirement=nil)
     {
       "Initiating Player" => @name,
@@ -14,8 +14,9 @@ class Player
   def initialize(name)
     @name = name
     @hand = []
-    @game = nil
+    @in_game = true
     @status = "Open"
+    @is_turn = false
   end
 
   def draw(card_name)
@@ -27,6 +28,14 @@ class Player
       @hand.delete_at(@hand.index(card_name))
     else
       raise "You don't have this card in your hand"
+    end
+  end
+
+  def play_card(player_action)
+    case player_action["Card"]
+    when "Guard"
+      play_guard()
+    else
     end
   end
 

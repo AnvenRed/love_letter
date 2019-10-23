@@ -21,7 +21,44 @@ class LoveLetter
     @deck = shuffled
     @players = {}
     @in_play = []
+    @discarded = []
     @card_values = @@card_values
+    @game_over = false
+    @last_card_played = ""
+  end
+
+  def get_current_state()
+    {
+      "Game State" => get_game_state(),
+      "Player States" => get_player_states()
+    }
+  end
+
+  def get_game_state()
+    {
+      "Cards Left" => @deck.length,
+      "Discard Pile" => @discarded,
+      "Game Over" => @game_over ? "True" : "False",
+      "Removed Card" => @removed_card,
+      "Last Played Card" => @last_card_played
+    }
+  end
+
+  def get_player_states()
+    returned = []
+    @players.each do |key, value|
+      returned.push(get_player_state(value))
+    end
+    returned
+  end
+
+  def get_player_state(player)
+    {
+      "Name" => player.name,
+      "In Game" => player.in_game,
+      "Hand" => player.hand,
+      "Is Turn" => player.is_turn
+    }
   end
 
   def add_player(player)
@@ -50,9 +87,27 @@ class LoveLetter
     status_change
   end
 
-  def execute_card_action(card_name)
-    if card_name == "Princess"
-      "You lose"
+  def execute_card_action(player_action)
+    card_played = player_action["Card Played"]
+    @last_card_played = card_played
+    case card_played
+    when "Guard"
+      guard_played(player_action)
+    when "Priest"
+      priest_played(player_action)
+    when "Baron"
+      baron_played(player_action)
+    when "Handmaid"
+      handmaid_played(player_action)
+    when "Prince"
+      prince_played(player_action)
+    when "King"
+      king_played(player_action)
+    when "Countess"
+    when "Princess"
+      princess_played(player_action)
+    else
+      "No Card Provided"
     end
   end
 

@@ -14,8 +14,8 @@ class TestPlayer < Test::Unit::TestCase
   end
 
   def test_draw()
-    @player.draw("Guard")
-    assert_equal("Guard",@player.hand[0])
+    assert_equal(["Guard"],@player.draw("Guard"))
+    assert_equal(["Guard","Countess"], @player.draw("Countess"))
   end
 
   def test_discard()
