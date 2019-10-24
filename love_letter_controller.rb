@@ -4,8 +4,9 @@ require 'sinatra/contrib'
 require 'sinatra/json'
 require 'sinatra/cross_origin'
 require 'uuid'
-#require_relative 'LoveLetter.rb'
-#require_relative 'Player.rb'
+require_relative './game_classes/LoveLetter.rb'
+require_relative './game_classes/Player.rb'
+require_relative './game_classes/GameMaster.rb'
 
 set :bind, '0.0.0.0'
 set :port, 5000
@@ -16,25 +17,30 @@ before do
   response.headers['Access-Control-Allow-Origin'] = '*'
 end
 
-=begin
-love_letter = LoveLetter.new
 arr = []
 uuid = UUID.new
-player1 = Player.new('Player1')
-player2 = Player.new('Player2')
-love_letter.players['Player1'] = player1
-love_letter.players['Player2'] = player2
+game = LoveLetter.new
+gm = GameMaster.new(game)
+players = []
 
-deck = love_letter.deck
-=end
+count = 0
+
 get '/' do
   if (cookies[:session] == nil) 
     thisKey = uuid.generate
     cookies[:session] = thisKey
+    player = Player.new(thisKey)
+    players.push(player)
   end
-  "#{cookies[:session]}"
-  redirect '/draw'
+  if (players.length == 2)
+    redirect '/game_start'
+  end
 end
+
+get '/game_start' do
+  for player in players
+    gm.add(player)
+  "#{gm.get_players}"
 
 post '/player_action' do
   request.body.rewind
