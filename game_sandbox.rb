@@ -1,6 +1,6 @@
-require_relative '../LoveLetter/game_classes/LoveLetter.rb'
-require_relative '../LoveLetter/game_classes/Player.rb'
-require_relative '../LoveLetter/game_classes/GameMaster.rb'
+require_relative './game_classes/LoveLetter.rb'
+require_relative './game_classes/Player.rb'
+require_relative './game_classes/GameMaster.rb'
 
 # player1 = Player.new("Player1")
 # player1.draw("Guard")
@@ -35,6 +35,8 @@ player_action = {
   "Card Played Requirement" => player2.hand[0]
 }
 puts "Player1 Hand: #{player1.hand}"
+puts "Player2 Hand: #{player2.hand}"
+puts "Player1 Plays Guard and guesses that Player2 has #{player2.hand}"
 player_return = gm.player_plays_card(player_action)
 puts "Player1 Return: #{player_return["Initiating Player Return"]}"
 puts "Player2 Return: #{player_return["Target Player Return"]}"
