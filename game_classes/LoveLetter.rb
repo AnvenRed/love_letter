@@ -166,19 +166,24 @@ class LoveLetter
 
   def handmaid_played(player_action)
     change_status(create_status_change(player_action["Initiating Player"], "Protected"))
+    return {
+      "Initiating Player Return" => "You now have the handmaid's protection!"
+    }
   end
 
   def prince_played(player_action)
     target_player = @players[player_action["Target Player"]]
     discarded = target_player.hand[0]
+    @discarded.push(discarded)
     if @deck.empty?
       target_player.hand = [@removed_card]
     else
       target_player.discard(discarded)
       target_player.draw(self.get_card)
     end
-    {
-      "Discarded" => discarded
+    return {
+      "Initiating Player Return" => "#{target_player.name} has discarded their hand"
+      "Target Player Return" => "You must discard your hand"
     }
   end
 
@@ -188,10 +193,19 @@ class LoveLetter
     ip_hand = initiating_player.hand
     initiating_player.hand = target_player.hand
     target_player.hand = ip_hand
+    player_return = {
+      "Initiating Player Return" => initiating_player.hand,
+      "Target Player Return" => target_player.hand
+    }
+    return player_return
   end
 
   def princess_played(player_action)
     change_status(create_status_change(player_action["Initiating Player"], "Out"))
+    player_return = {
+      "Initiating Player Return" => "You played the princess, you're out!"
+    }
+    return player_return
   end
 
 end
