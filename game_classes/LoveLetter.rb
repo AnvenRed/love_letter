@@ -182,7 +182,7 @@ class LoveLetter
       target_player.draw(self.get_card)
     end
     return {
-      "Initiating Player Return" => "#{target_player.name} has discarded their hand"
+      "Initiating Player Return" => "#{target_player.name} has discarded their hand",
       "Target Player Return" => "You must discard your hand"
     }
   end
