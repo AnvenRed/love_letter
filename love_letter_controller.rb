@@ -1,11 +1,22 @@
 # myapp.rb
 require 'sinatra'
 require 'sinatra/contrib'
+require 'sinatra/json'
+require 'sinatra/cross_origin'
 require 'uuid'
+#require_relative 'LoveLetter.rb'
+#require_relative 'Player.rb'
 
 set :bind, '0.0.0.0'
 set :port, 5000
+configure do
+  enable :cross_origin
+end
+before do
+  response.headers['Access-Control-Allow-Origin'] = '*'
+end
 
+=begin
 love_letter = LoveLetter.new
 arr = []
 uuid = UUID.new
@@ -15,7 +26,7 @@ love_letter.players['Player1'] = player1
 love_letter.players['Player2'] = player2
 
 deck = love_letter.deck
-
+=end
 get '/' do
   if (cookies[:session] == nil) 
     thisKey = uuid.generate
@@ -23,6 +34,12 @@ get '/' do
   end
   "#{cookies[:session]}"
   redirect '/draw'
+end
+
+post '/player_action' do
+  request.body.rewind
+  player_action = JSON.parse request.body.read
+  json player_action
 end
 
 =begin
@@ -44,11 +61,11 @@ end
 =end
 
 get '/deck' do
-  "#{love_letter.deck}"
+  #"#{love_letter.deck}"
 end
 
 get '/hand' do
-  "#{player1.hand}"
+  #json player1.hand
 end
 
 get '/remove_card' do
@@ -63,9 +80,12 @@ get '/remove_card' do
 end
 
 get '/draw' do
-  player1.draw(love_letter.get_card)
+  #player1.draw(love_letter.get_card)
+  #player2.draw(love_letter.get_card)
   redirect '/hand'
 end
+
+
 
 =begin
 get '/draw' do
@@ -80,6 +100,22 @@ get '/draw' do
 end
 =end
 
+get '/play_guard' do
+  #player_action = player1.play_guard('Player2','Priest') 
+  #"#{love_letter.guard(player_action)}"
+  redirect '/hand'
+end
+
+get '/play_priest' do
+  #player_action = player1.play_priest('Player2')
+  #"#{love_letter.priest(player_action)}"
+end
+
+get '/play_baron' do
+  #player_action = player1.play_baron('Player2')
+  #"#{love_letter.baron(player_action)}"
+end
+
 get '/peak' do
   display = "Player &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Hands<br>"
   player_hands.each do |key, value|
@@ -88,3 +124,10 @@ get '/peak' do
   end 
   "#{display}"
 end
+
+  options "*" do
+    response.headers["Allow"] = "GET, PUT, POST, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Accept, X-User-Email, X-Auth-Token"
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    200
+  end
