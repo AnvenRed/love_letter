@@ -50,4 +50,8 @@ class GameMaster
     @game.execute_card_action(player_action)
   end
 
+  def get_current_state
+    @game.get_current_state
+  end
+
 end
