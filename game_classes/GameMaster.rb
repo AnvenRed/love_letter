@@ -13,9 +13,11 @@ class GameMaster
   end
 
   def get_player_hands()
+    returned = {}
     @game.players.each_value do |player|
-      puts player.hand
+      returned[player.name] = player.hand
     end
+    return returned
   end
 
   def start_game()
