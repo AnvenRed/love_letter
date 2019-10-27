@@ -77,6 +77,13 @@ class LoveLetter
     }
   end
 
+  def player_is_out(player_name)
+    player_obj = @players[player_name]
+    player_obj.in_game = false
+    player_obj.status = "Out"
+    @in_play.remove(player_name)
+  end
+
   def change_status(status_change)
     player = status_change["Player"]
     new_status = status_change["Status"]
@@ -117,12 +124,12 @@ class LoveLetter
       "Initiating Player Return" => "You guessed right!",
       "Target Player Return" => "You're out!"
     }
-    target_player = player_action["Target Player"]
+    initiating_player_name = player_action["Initiating Player"]
+    target_player_name = player_action["Target Player"]
     guessed_card = player_action['Card Played Requirement']
-    target_player_card = @players[target_player].hand[0]
+    target_player_card = @players[target_player_name].hand[0]
     if guessed_card == target_player_card
-      status_change = create_status_change(target_player,"Out")
-      change_status(status_change)
+      player_is_out(target_player_name)
       return player_return
     else
       player_return["Initiating Player Return"] = "You guessed wrong!"
@@ -150,14 +157,14 @@ class LoveLetter
     target_player = @players[player_action["Target Player"]]
     tp_card_val = @@card_values[target_player.hand[0]]
     if ip_card_val > tp_card_val
-      change_status(create_status_change(target_player.name, "Out"))
+      player_is_out(target_player.name)
       return player_return
     elsif ip_card_val == tp_card_val
       player_return["Initiating Player Return"] = "It's a Tie!"
       player_return["Target Player Return"] = "It's a Tie!"
       return player_return
     else
-      change_status(create_status_change(initiating_player.name, "Out"))
+      player_is_out(initiating_player.name)
       player_return["Initiating Player Return"] = "You're out!"
       player_return["Target Player Return"] = "You win the exchange!"
       return player_return
@@ -165,7 +172,8 @@ class LoveLetter
   end
 
   def handmaid_played(player_action)
-    change_status(create_status_change(player_action["Initiating Player"], "Protected"))
+    player_obj = player_action["Initiating Player"]
+    player_obj.status = "Protected"
     return {
       "Initiating Player Return" => "You now have the handmaid's protection!"
     }
@@ -175,16 +183,25 @@ class LoveLetter
     target_player = @players[player_action["Target Player"]]
     discarded = target_player.hand[0]
     @discarded.push(discarded)
-    if @deck.empty?
-      target_player.hand = [@removed_card]
+    if discarded == "Princess"
+      player_is_out(target_player.name)
+      return {
+        "Initiating Player Return" => "You got #{target_player.name} out!",
+        "Target Player Return" => "You're out!",
+        "All Player Return" => "#{target_player.name} discarded the Princess!"
+      }
     else
-      target_player.discard(discarded)
-      target_player.draw(self.get_card)
+      if @deck.empty?
+        target_player.hand = [@removed_card]
+      else
+        target_player.discard(discarded)
+        target_player.draw(self.get_card)
+      end
+      return {
+        "Initiating Player Return" => "#{target_player.name} has discarded their hand",
+        "Target Player Return" => "You must discard your hand"
+      }
     end
-    return {
-      "Initiating Player Return" => "#{target_player.name} has discarded their hand",
-      "Target Player Return" => "You must discard your hand"
-    }
   end
 
   def king_played(player_action)
@@ -201,7 +218,8 @@ class LoveLetter
   end
 
   def princess_played(player_action)
-    change_status(create_status_change(player_action["Initiating Player"], "Out"))
+    player_name = player_action["Initiating Player"]
+    player_is_out(player_name)
     player_return = {
       "Initiating Player Return" => "You played the princess, you're out!"
     }

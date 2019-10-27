@@ -4,6 +4,14 @@ class GameMaster
     @game = game
   end
 
+  def game_over?
+    if @game.in_play.length == 1
+      @game.game_over = true
+      return true
+    end
+    return false
+  end
+
   def add_player(player)
     @game.add_player(player)
   end
