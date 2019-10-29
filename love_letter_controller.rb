@@ -21,8 +21,9 @@ arr = []
 uuid = UUID.new
 game = LoveLetter.new
 gm = GameMaster.new(game)
-players = []
-
+players = {}
+player_map = {}
+player_names = {}
 count = 0
 
 get '/' do
@@ -30,23 +31,43 @@ get '/' do
     thisKey = uuid.generate
     cookies[:session] = thisKey
     player = Player.new(thisKey)
-    players.push(player)
+    players[thisKey] = player 
   end
-  if (players.length == 2)
+  if (players.keys.length == 2)
     redirect '/game_start'
   end
 end
 
+post '/set_name' do
+  request.body.rewind
+  request_body = JSON.parse request.body.read
+  player_name = request_body['name']
+  player_names[player_name] = cookies[:session]
+  return "Name set to: #{player_name}"
+end
+
 get '/game_start' do
-  for player in players
-    gm.add(player)
-  "#{gm.get_players}"
+  players.each_value do |player|
+    #puts "#{player.name}"
+    gm.add_player(player)
+  end
+  json gm.start_game
+  redirect '/hand'
+end
 
 post '/player_action' do
   request.body.rewind
   player_action = JSON.parse request.body.read
-  json player_action
+  player_action["Initiating Player"] = player_names[player_action["Initiating Player"]] 
+  player_action["Target Player"] = player_names[player_action["Target Player"]]
+  puts player_action
+  json gm.player_plays_card(player_action)
 end
+
+get '/state' do
+  json gm.get_current_state
+end
+  
 
 =begin
 get '/hand' do
@@ -71,7 +92,8 @@ get '/deck' do
 end
 
 get '/hand' do
-  #json player1.hand
+  player = players[cookies[:session]]
+  "#{player.hand}"
 end
 
 get '/remove_card' do
@@ -86,8 +108,8 @@ get '/remove_card' do
 end
 
 get '/draw' do
-  #player1.draw(love_letter.get_card)
-  #player2.draw(love_letter.get_card)
+  player = players[cookies[:session]]
+  gm.player_draws_card(player) 
   redirect '/hand'
 end
 
