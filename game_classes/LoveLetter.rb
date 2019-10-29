@@ -81,7 +81,7 @@ class LoveLetter
     player_obj = @players[player_name]
     player_obj.in_game = false
     player_obj.status = "Out"
-    @in_play.remove(player_name)
+    @in_play.delete(player_name)
   end
 
   def change_status(status_change)
@@ -96,6 +96,15 @@ class LoveLetter
 
   def execute_card_action(player_action)
     card_played = player_action["Card Played"]
+    if player_action.key?("Target Player") and card_played != "Handmaid"
+      target_player_name = player_action["Target Player"]
+      target_player_obj = @players[target_player_name]
+      if target_player_obj.status == "Protected"
+        return {
+          "Initiating Player Return" => "That player is protected by the Handmaid you fool"
+        }
+      end
+    end
     @discarded.push(card_played)
     @last_card_played = card_played
     case card_played
@@ -172,7 +181,8 @@ class LoveLetter
   end
 
   def handmaid_played(player_action)
-    player_obj = player_action["Initiating Player"]
+    player_name = player_action["Initiating Player"]
+    player_obj = @players[player_name]
     player_obj.status = "Protected"
     return {
       "Initiating Player Return" => "You now have the handmaid's protection!"
