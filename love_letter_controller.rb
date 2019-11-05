@@ -31,11 +31,12 @@ get '/' do
     thisKey = uuid.generate
     cookies[:session] = thisKey
     player = Player.new(thisKey)
-    players[thisKey] = player 
+    players[thisKey] = player
+    return json cookies[:session]
   end
-  if (players.keys.length == 2)
-    redirect '/game_start'
-  end
+  #if (players.keys.length == 3)
+  #  redirect '/game_start'
+  #end
 end
 
 post '/set_name' do
@@ -44,6 +45,14 @@ post '/set_name' do
   player_name = request_body['name']
   player_names[player_name] = cookies[:session]
   return "Name set to: #{player_name}"
+end
+
+get '/searching' do
+  searching = {}
+  searching['play'] = true
+  if (player_names.keys.length == 2)
+    return json searching['play'] = false
+  end
 end
 
 get '/game_start' do
