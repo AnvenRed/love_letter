@@ -47,14 +47,6 @@ post '/set_name' do
   return "Name set to: #{player_name}"
 end
 
-get '/searching' do
-  searching = {}
-  searching['play'] = true
-  if (player_names.keys.length == 2)
-    return json searching['play'] = false
-  end
-end
-
 get '/game_start' do
   players.each_value do |player|
     #puts "#{player.name}"
@@ -76,90 +68,16 @@ end
 get '/state' do
   json gm.get_current_state
 end
-  
-
-=begin
-get '/hand' do
-  if (cookies[:session] != nil)
-    if (!player_hands.has_key?(cookies[:session]))
-      size = 4
-      hand = []
-      while size > 0
-        card = rand(8)
-        hand << deck[card]
-        size = size - 1
-      end
-      player_hands[cookies[:session]] = hand
-    end
-  end
-    "#{player_hands[cookies[:session]]}"
-end
-=end
-
-get '/deck' do
-  #"#{love_letter.deck}"
-end
 
 get '/hand' do
   player = players[cookies[:session]]
   "#{player.hand}"
 end
 
-get '/remove_card' do
-  if (cookies[:session] != nil)
-    if (player_hands.has_key?(cookies[:session]))
-      hand = player_hands[cookies[:session]]
-      hand.pop
-      player_hands[cookies[:session]] = hand
-    end
-  end
-  redirect '/hand'
-end
-
 get '/draw' do
   player = players[cookies[:session]]
   gm.player_draws_card(player) 
   redirect '/hand'
-end
-
-
-
-=begin
-get '/draw' do
-  if (cookies[:session] != nil)
-    if (player_hands.has_key?(cookies[:session]))
-      hand = player_hands[cookies[:session]]
-      hand.push(cards[rand(8)])
-      player_hands[cookies[:session]] = hand
-    end
-  end
-  redirect '/hand'
-end
-=end
-
-get '/play_guard' do
-  #player_action = player1.play_guard('Player2','Priest') 
-  #"#{love_letter.guard(player_action)}"
-  redirect '/hand'
-end
-
-get '/play_priest' do
-  #player_action = player1.play_priest('Player2')
-  #"#{love_letter.priest(player_action)}"
-end
-
-get '/play_baron' do
-  #player_action = player1.play_baron('Player2')
-  #"#{love_letter.baron(player_action)}"
-end
-
-get '/peak' do
-  display = "Player &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Hands<br>"
-  player_hands.each do |key, value|
-    value = value.map { |i| "'" + i.to_s + "'" }.join(",")
-    display += "#{key} #{value}<br>"
-  end 
-  "#{display}"
 end
 
   options "*" do
